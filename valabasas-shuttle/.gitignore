@@ -1,0 +1,12 @@
+node_modules
+dist
+dist-ssr
+.vite
+coverage
+test-results
+playwright-report
+.DS_Store
+*.local
+.vercel
+.netlify
+*.tsbuildinfo

@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    /* Fallbacks so the layout is sane in a normal browser tab too. */
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-ink-900 text-slate-100 antialiased;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    /* No rubber-banding or accidental text selection while driving. */
+    overscroll-behavior-y: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  input,
+  textarea,
+  select {
+    -webkit-user-select: text;
+    user-select: text;
+    /* 16px minimum stops iOS zooming the page on focus. */
+    font-size: 16px;
+  }
+
+  button {
+    touch-action: manipulation;
+  }
+}
+
+@layer components {
+  .safe-top {
+    padding-top: calc(var(--safe-top) + 0.5rem);
+  }
+
+  .safe-bottom {
+    padding-bottom: calc(var(--safe-bottom) + 0.5rem);
+  }
+
+  .safe-x {
+    padding-left: calc(var(--safe-left) + 1rem);
+    padding-right: calc(var(--safe-right) + 1rem);
+  }
+
+  /* Every interactive control clears 56px. */
+  .tap {
+    @apply min-h-tap inline-flex items-center justify-center rounded-2xl px-4 text-lg font-semibold
+      transition-transform duration-75 active:scale-[0.98] disabled:opacity-40 disabled:active:scale-100;
+  }
+
+  .tap-primary {
+    @apply tap w-full bg-brand-500 text-ink-900 shadow-lg shadow-brand-600/20;
+  }
+
+  .tap-secondary {
+    @apply tap bg-ink-600 text-slate-100;
+  }
+
+  .tap-ghost {
+    @apply tap border border-ink-500 bg-transparent text-slate-200;
+  }
+
+  .tap-danger {
+    @apply tap bg-red-600 text-white;
+  }
+
+  .card {
+    @apply rounded-3xl border border-ink-600 bg-ink-800 p-4;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm font-bold uppercase tracking-wide;
+  }
+
+  .field {
+    @apply min-h-tap w-full rounded-2xl border border-ink-500 bg-ink-700 px-4 text-lg text-slate-100
+      placeholder:text-slate-500 focus:border-brand-500 focus:outline-none;
+  }
+
+  .label {
+    @apply mb-2 block text-sm font-bold uppercase tracking-wide text-slate-400;
+  }
+}
