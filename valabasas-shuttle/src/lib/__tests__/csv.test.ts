@@ -158,6 +158,32 @@ describe('CSV import', () => {
     expect(rows[0].durationMinutes).toBe(60)
   })
 
+  it('names the required columns a sheet is missing instead of failing every row', () => {
+    const wrongShape = [
+      'When,Who,Booth,Headcount',
+      'Tuesday 8am,Denim Republic,C-12,2',
+    ].join('\n')
+    const preview = parseAppointmentsCsv(wrongShape, settings(), TODAY)
+    // "When" maps to nothing, "Who" is not an account alias.
+    expect(preview.missingColumns).toEqual(['Date', 'Time', 'Account'])
+    expect(preview.headers).toEqual(['When', 'Who', 'Booth', 'Headcount'])
+    expect(preview.rows).toHaveLength(0)
+    // One clear explanation, not one error per row.
+    expect(preview.issues).toHaveLength(0)
+  })
+
+  it('reports only the required column that is actually missing', () => {
+    const noAccount = ['Date,Time,Contact', '8/10/2026,8:00 AM,Ann'].join('\n')
+    expect(parseAppointmentsCsv(noAccount, settings(), TODAY).missingColumns).toEqual(['Account'])
+  })
+
+  it('is happy as long as the three required columns are present under any alias', () => {
+    const aliased = ['Day,Start,Company', '8/10/2026,8:00 AM,Denim Republic'].join('\n')
+    const preview = parseAppointmentsCsv(aliased, settings(), TODAY)
+    expect(preview.missingColumns).toEqual([])
+    expect(preview.rows).toHaveLength(1)
+  })
+
   it('reports columns it ignored so typos are visible', () => {
     const extra = ['Date,Time,Account,Booth Number', '8/10/2026,8:00 AM,Acme,C-12'].join('\n')
     expect(parseAppointmentsCsv(extra, settings(), TODAY).unmappedHeaders).toEqual(['Booth Number'])

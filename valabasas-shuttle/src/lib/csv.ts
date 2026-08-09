@@ -15,7 +15,21 @@ export interface ImportPreview {
   issues: ImportIssue[]
   /** Header names we could not map to anything — surfaced so typos are visible. */
   unmappedHeaders: string[]
+  /**
+   * Required columns with no matching header at all. When this is non-empty the
+   * sheet is mis-shaped, not merely messy, and every row will fail for the same
+   * reason — say so once instead of repeating it per row.
+   */
+  missingColumns: string[]
+  /** Every header we read, so the driver can see what the app actually got. */
+  headers: string[]
 }
+
+const REQUIRED_FIELDS: { field: Field; label: string }[] = [
+  { field: 'date', label: 'Date' },
+  { field: 'time', label: 'Time' },
+  { field: 'account', label: 'Account' },
+]
 
 type Field =
   | 'date'
@@ -79,9 +93,18 @@ export const parseAppointmentsCsv = (
 
   const headers = parsed.meta.fields ?? []
   const { map, unmapped } = mapHeaders(headers)
+  const missingColumns = REQUIRED_FIELDS.filter(({ field }) => !map.has(field)).map(
+    ({ label }) => label,
+  )
 
   const rows: Appointment[] = []
   const issues: ImportIssue[] = []
+
+  // A missing required column fails every row for one reason. Report it once and
+  // stop, rather than burying it under a hundred identical per-row errors.
+  if (missingColumns.length > 0) {
+    return { rows, issues, unmappedHeaders: unmapped, missingColumns, headers }
+  }
 
   parsed.data.forEach((raw, index) => {
     // +2: one for the header row, one because humans count from 1.
@@ -143,7 +166,7 @@ export const parseAppointmentsCsv = (
     })
   })
 
-  return { rows, issues, unmappedHeaders: unmapped }
+  return { rows, issues, unmappedHeaders: unmapped, missingColumns, headers }
 }
 
 export const CSV_HEADERS = [

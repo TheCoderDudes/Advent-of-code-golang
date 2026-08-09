@@ -60,7 +60,30 @@ export const ImportScreen = ({ onNavigate }: { onNavigate: (tab: Tab) => void })
         {fileName ? <p className="mt-2 text-center text-sm text-slate-400">{fileName}</p> : null}
       </section>
 
-      {preview ? (
+      {preview && preview.missingColumns.length > 0 ? (
+        <section className="card border-2 border-red-500" data-testid="import-missing-columns">
+          <h3 className="text-xl font-black text-red-300">
+            Can't read this sheet — no {preview.missingColumns.join(' or ')} column
+          </h3>
+          <p className="mt-2 text-base text-slate-300">
+            Every appointment needs a date, a time and an account name. The columns this file
+            actually has are:
+          </p>
+          <p className="mt-2 rounded-xl bg-ink-700 px-3 py-2 text-base text-slate-200">
+            {preview.headers.length > 0 ? preview.headers.join(' · ') : '(no header row found)'}
+          </p>
+          <p className="mt-3 text-base text-slate-400">
+            Rename the column{preview.missingColumns.length > 1 ? 's' : ''} in your sheet to{' '}
+            <span className="text-slate-200">{preview.missingColumns.join(' and ')}</span>, re-export
+            as CSV, and try again. Make sure the header row is the first row of the sheet.
+          </p>
+          <button type="button" className="tap-ghost mt-4 w-full" onClick={() => setPreview(null)}>
+            Cancel
+          </button>
+        </section>
+      ) : null}
+
+      {preview && preview.missingColumns.length === 0 ? (
         <section className="card" data-testid="import-preview">
           <h3 className="text-xl font-black">
             {preview.rows.length} {preview.rows.length === 1 ? 'row' : 'rows'} ready

@@ -274,6 +274,22 @@ test.describe('full driving day', () => {
     await expect(page.getByTestId('run-heads')).toHaveText('3 accounts · 6 people')
   })
 
+  test('a sheet with the wrong columns says exactly what is missing', async ({ page }) => {
+    await page.getByTestId('tab-import').click()
+    await page.getByTestId('csv-input').setInputFiles({
+      name: 'wrong.csv',
+      mimeType: 'text/csv',
+      buffer: Buffer.from('When,Who,Booth\nTuesday 8am,Denim Republic,C-12'),
+    })
+
+    const callout = page.getByTestId('import-missing-columns')
+    await expect(callout).toBeVisible()
+    await expect(callout).toContainText('no Date or Time or Account column')
+    await expect(callout).toContainText('When · Who · Booth')
+    // Nothing importable is offered, so nothing can be committed by mistake.
+    await expect(page.getByTestId('import-preview')).toHaveCount(0)
+  })
+
   test('first open with no data lands on the import screen', async ({ page }) => {
     await page.goto('/')
     await page.evaluate(() => localStorage.clear())
